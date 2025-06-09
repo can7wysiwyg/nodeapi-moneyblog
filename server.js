@@ -7,7 +7,8 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const AdminArticles = require('./admin/AdminArticles');
 const AdminCategory = require('./admin/AdminCategory')
-const PublicArticles = require('./public/PublicArticles')
+const PublicArticles = require('./public/PublicArticles');
+const PublicCategories = require('./public/PublicCategories');
 
 
 mongoose.connect(process.env.MONGO_DEVT_URL);
@@ -38,7 +39,7 @@ app.use(fileUpload({ useTempFiles: true }));
 app.use(AdminArticles)
 app.use(AdminCategory)
 app.use(PublicArticles)
-
+app.use(PublicCategories)
 
 
 

@@ -25,7 +25,7 @@ PublicArticles.get('/public/article-single/:id', async(req, res) => {
         const relatedPipeline = [
             { 
                 $match: { 
-                    _id: { $ne: mongoose.Types.ObjectId(id) }, 
+                    _id: { $ne: new mongoose.Types.ObjectId(id) }, 
                     $or: [
                         
                         { 

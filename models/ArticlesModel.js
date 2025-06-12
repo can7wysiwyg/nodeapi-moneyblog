@@ -35,6 +35,11 @@ const ArticleSchema = mongoose.Schema({
         enum: ['regular', 'campaign period'],
         default: 'regular'
 
+    },
+    mainArticle: {
+        type: Boolean,
+        default: false
+
     }
 
 

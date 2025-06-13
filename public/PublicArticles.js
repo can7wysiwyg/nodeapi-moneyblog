@@ -182,65 +182,73 @@ PublicArticles.get('/public/article-single/:id', async (req, res) => {
 });
 
 
+
+// Fisher-Yates shuffle 
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+
+
+
 PublicArticles.get('/public/show-articles', async(req, res) => {
-
     try {
+        const articles = await Article.find().sort({_id: -1});
         
-
-        const articles = await Article.find().sort({_id: -1})
-
         if(articles.length === 0) {
-                
-            return res.json({msg: "There are no articles at the moment!"})
-
+            return res.json({msg: "There are no articles at the moment!"});
         }
-
-        res.json({articles})
-
+        
+        // Apply Fisher-Yates shuffle to articles
+        const shuffledArticles = shuffleArray(articles);
+        
+        res.json({articles: shuffledArticles});
     } catch (error) {
         console.error(`Error fetching articles: ${error.message}`);
         res.status(500).json({ msg: "Server Error" });
-        
     }
+});
 
-
-})
 
 
 PublicArticles.get('/public/articles-by-clicked', async(req, res) => {
     try {
-        const {catId, subCatId, keyword} = req.query
-
-        console.log(`catId: ${catId}, subCatId: ${subCatId}, keyword: ${keyword}`)
-
-        const keywords = Array.isArray(keyword) ? keyword : [keyword];
-
-        if(!catId) {
-            return res.json({msg: "Category cannot be empty"})
-        }
-
-        if(keyword?.length === 0) {
-            return res.json({msg: "Suggestion only works with keywords"})
-        }
-
-        let pipeline;
-
-        if(subCatId) {
+        const {catId, subCatId, keyword} = req.query;
         
+        console.log(`catId: ${catId}, subCatId: ${subCatId}, keyword: ${keyword}`);
+        
+        const keywords = Array.isArray(keyword) ? keyword : [keyword];
+        
+        if(!catId) {
+            return res.json({msg: "Category cannot be empty"});
+        }
+        
+        if(keyword?.length === 0) {
+            return res.json({msg: "Suggestion only works with keywords"});
+        }
+        
+        let pipeline;
+        
+        if(subCatId) {
             pipeline = [
-                { 
-                    $match: { 
-                        catId: new mongoose.Types.ObjectId(catId), 
+                {
+                    $match: {
+                        catId: new mongoose.Types.ObjectId(catId),
                         subCatId: subCatId,
                         articleKeywords: { $in: keywords }
                     }
                 },
-                { 
-                    $addFields: { 
+                {
+                    $addFields: {
                         keywordMatches: { $size: { $setIntersection: ["$articleKeywords", keywords] } },
-                        score: { 
+                        score: {
                             $add: [
-                                "$articleClicks", 
+                                "$articleClicks",
                                 { $multiply: ["$keywordMatches", 5] }
                             ]
                         }
@@ -258,21 +266,20 @@ PublicArticles.get('/public/articles-by-clicked', async(req, res) => {
                 { $unwind: "$catId" }
             ];
         } else {
-            
             pipeline = [
-                { 
-                    $match: { 
+                {
+                    $match: {
                         catId: mongoose.Types.ObjectId(catId),
                         articleKeywords: { $in: keywords }
                     }
                 },
-                { 
-                    $addFields: { 
+                {
+                    $addFields: {
                         keywordMatches: { $size: { $setIntersection: ["$articleKeywords", keywords] } },
-                        score: { 
+                        score: {
                             $add: [
-                                "$articleClicks", 
-                                { $multiply: ["$keywordMatches", 5] } 
+                                "$articleClicks",
+                                { $multiply: ["$keywordMatches", 5] }
                             ]
                         }
                     }
@@ -289,19 +296,113 @@ PublicArticles.get('/public/articles-by-clicked', async(req, res) => {
                 { $unwind: "$catId" }
             ];
         }
-
+        
         const allArticles = await Article.aggregate(pipeline);
-
+        
+        // Apply Fisher-Yates shuffle to the results
+        const shuffledArticles = shuffleArray(allArticles);
         
         res.json({
-            count: allArticles.length,
-            articles: allArticles});
+            count: shuffledArticles.length,
+            articles: shuffledArticles
+        });
         
     } catch (error) {
         console.error(`Error fetching articles by clicked: ${error.message}`);
         res.status(500).json({ msg: "Server Error" });
     }
-})
+});
+
+
+
+// categorical articles
+
+
+
+PublicArticles.get('/public/articles-by-category/:id', async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { shuffle = 'true' } = req.query; // Optional shuffle parameter
+        
+        if (!id) {
+            return res.status(400).json({ msg: "Category ID is missing" });
+        }
+
+    
+        const category = await Category.findById(id);
+        if (!category) {
+            return res.status(404).json({ msg: "Category not found" });
+        }
+
+        
+        const articles = await Article.find({ catId: id });
+        
+        if (articles.length === 0) {
+            return res.json({ 
+                msg: "There are no articles in this category at the moment!",
+                category: category.category,
+                subcategories: []
+            });
+        }
+
+        
+        const subcategoryGroups = {};
+        
+        
+        category.subCategory.forEach(subCat => {
+            subcategoryGroups[subCat.name] = [];
+        });
+
+        
+        
+        articles.forEach(article => {
+            const articleSubCatId = article.subCatId.toString(); 
+            
+        
+            const matchingSubCat = category.subCategory.find(subCat => 
+                subCat._id.toString() === articleSubCatId
+            );
+            
+            if (matchingSubCat) {
+                subcategoryGroups[matchingSubCat.name].push(article);
+            } else {
+                
+                if (!subcategoryGroups['Unmatched']) {
+                    subcategoryGroups['Unmatched'] = [];
+                }
+                subcategoryGroups['Unmatched'].push(article);
+            }
+        });
+
+        
+        if (shuffle === 'true') {
+            Object.keys(subcategoryGroups).forEach(subCatName => {
+                subcategoryGroups[subCatName] = shuffleArray(subcategoryGroups[subCatName]);
+            });
+        }
+
+        
+        const subcategories = Object.keys(subcategoryGroups).map(subCatName => ({
+            name: subCatName,
+            articles: subcategoryGroups[subCatName],
+            totalArticles: subcategoryGroups[subCatName].length
+        }));
+
+        res.json({
+            success: true,
+            category: category.category,
+            totalArticles: articles.length,
+            subcategories: subcategories
+        });
+
+    } catch (error) {
+        console.log(`Error fetching articles by category: ${error.message}`);
+        res.status(500).json({ msg: "Server Error" });
+    }
+});
+
+
+
 
 
 

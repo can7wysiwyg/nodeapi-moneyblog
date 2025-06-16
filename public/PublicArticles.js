@@ -420,10 +420,6 @@ catIds.forEach(catId => {
 });
 
 
-
-
-        
-
         const result = await Article.aggregate([
   { $match: { articleClicks: { $gte: 0 } } },
   { $facet: facetStage },
@@ -460,5 +456,25 @@ const trendingArticles = shuffleArray(result);
 })
 
 
+
+PublicArticles.get('/public/latest-articles', async(req, res) => {
+try {
+
+    const latestArticles = await Article.find().sort({_id: -1}).limit(10).select('_id title')
+
+    if(latestArticles.length === 0) {
+        return res.json({msg: "There are no latest articles at the moment"})
+    }
+
+    res.json({latestArticles})
+    
+} catch (error) {
+    console.log("Error fetching latest articles:", error.message)
+
+    res.json({msg: "Server Error", error: error.message})
+}
+
+
+})
 
 module.exports = PublicArticles

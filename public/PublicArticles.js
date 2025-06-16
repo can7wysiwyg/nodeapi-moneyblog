@@ -220,7 +220,6 @@ PublicArticles.get('/public/articles-by-clicked', async(req, res) => {
     try {
         const {catId, subCatId, keyword} = req.query;
         
-        console.log(`catId: ${catId}, subCatId: ${subCatId}, keyword: ${keyword}`);
         
         const keywords = Array.isArray(keyword) ? keyword : [keyword];
         
@@ -403,7 +402,62 @@ PublicArticles.get('/public/articles-by-category/:id', async(req, res) => {
 
 
 
+PublicArticles.get('/public/trending-news', async(req, res) => {
 
+
+    try {
+
+        const catIds = await Article.distinct('catId')
+
+        const facetStage = {};
+catIds.forEach(catId => {
+  facetStage[catId.toString()] = [
+    { $match: { catId: catId} },
+    { $sort: { articleClicks: 1 } },
+    { $limit: 3 },
+    { $project: { title: 1, articleClicks: 1, catId: 1 } }
+  ];
+});
+
+
+
+
+        
+
+        const result = await Article.aggregate([
+  { $match: { articleClicks: { $gte: 0 } } },
+  { $facet: facetStage },
+  {
+    $project: {
+      allArticles: {
+        $reduce: {
+          input: { $objectToArray: "$$ROOT" },
+          initialValue: [],
+          in: { $concatArrays: ["$$value", "$$this.v"] }
+        }
+      }
+    }
+  },
+  { $unwind: "$allArticles" },
+  { $replaceRoot: { newRoot: "$allArticles" } }
+]);
+
+const trendingArticles = shuffleArray(result);
+
+
+        res.json({trendingArticles})
+
+        
+    } catch (error) {
+
+        console.log(`there was a problem ${error.message}`)
+
+        res.json({msg: "Server Error", error: error.message})
+        
+    }
+
+
+})
 
 
 

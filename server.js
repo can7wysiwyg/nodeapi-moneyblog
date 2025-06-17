@@ -9,7 +9,9 @@ const AdminArticles = require('./admin/AdminArticles');
 const AdminCategory = require('./admin/AdminCategory')
 const PublicArticles = require('./public/PublicArticles');
 const PublicCategories = require('./public/PublicCategories');
-const MiscRoute = require('./public/MiscRoute')
+const MiscRoute = require('./public/MiscRoute');
+const AdminSpellingBee = require('./admin/AdminSpellingBee');
+const AdminDictionary = require('./admin/AdminDictionary');
 
 
 mongoose.connect(process.env.MONGO_DEVT_URL);
@@ -42,6 +44,8 @@ app.use(AdminCategory)
 app.use(PublicArticles)
 app.use(PublicCategories)
 app.use(MiscRoute)
+app.use(AdminSpellingBee)
+app.use(AdminDictionary)
 
 
 

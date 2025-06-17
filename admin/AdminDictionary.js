@@ -3,16 +3,15 @@ const Dictionary = require('../models/DictionaryModel')
 
 AdminDictionary.post('/admin/create-dictionary', async (req, res) => {
   try {
-    const { words } = req.body;
+    const { word } = req.body;
 
-    if (!words || !Array.isArray(words) || words.length === 0) {
+    if (!word ) {
       return res.status(400).json({ msg: "No words provided" });
     }
 
     
-    const formattedWords = words.map(w => ({ word: w }));
-
-        const newDictionary = new Dictionary({ words: formattedWords });
+  
+        const newDictionary = new Dictionary({ word });
     await newDictionary.save();
 
     res.status(201).json({ msg: "Dictionary created successfully", dictionary: newDictionary });

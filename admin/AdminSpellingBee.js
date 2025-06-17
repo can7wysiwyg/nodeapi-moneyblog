@@ -1,5 +1,7 @@
-const AdminSpellingBee = require('express').Router()
-const SpellingBee = require('../models/SpellingBeeModel')
+const AdminSpellingBee = require('express').Router();
+const WeekSpellingBee = require('../models/SpellingBeeModel');
+const Dictionary = require('../models/DictionaryModel');
+
 
 function isValidWord(word, letters, centerLetter) {
   const letterSet = new Set(letters);
@@ -7,39 +9,69 @@ function isValidWord(word, letters, centerLetter) {
   return [...word].every(char => letterSet.has(char));
 }
 
-AdminSpellingBee.post('/admin/create-spellingbee', async (req, res) => {
+AdminSpellingBee.post('/admin/create-full-spellingbee-week', async (req, res) => {
   try {
-    const { letters, centerLetter, difficulty, createdBy = "admin" } = req.body;
+    const { weekName, spellings } = req.body;
 
-    if (!letters || letters.length !== 7 || !centerLetter || !difficulty) {
-      return res.status(400).json({ msg: "Invalid input. Please provide 7 letters, a centerLetter, and a difficulty." });
+    if (!weekName || !Array.isArray(spellings) || spellings.length !== 21) {
+      return res.status(400).json({
+        msg: "You must provide exactly 21 spelling challenges: 7 for each difficulty (easy, medium, hard)."
+      });
     }
 
-    const wordsByDifficulty = dictionary.filter(w => w.difficulty === difficulty);
+    const easyCount = spellings.filter(s => s.difficulty === 'easy').length;
+    const mediumCount = spellings.filter(s => s.difficulty === 'medium').length;
+    const hardCount = spellings.filter(s => s.difficulty === 'hard').length;
 
-    const validWords = wordsByDifficulty
-      .filter(wordObj => isValidWord(wordObj.word.toLowerCase(), letters, centerLetter))
-      .map(wordObj => ({
-        word: wordObj.word.toLowerCase(),
-        hint: wordObj.hint
-      }));
+    if (easyCount !== 7 || mediumCount !== 7 || hardCount !== 7) {
+      return res.status(400).json({
+        msg: "Each difficulty level (easy, medium, hard) must have exactly 7 spelling challenges.",
+        counts: { easy: easyCount, medium: mediumCount, hard: hardCount }
+      });
+    }
 
-    const puzzle = new SpellingBee({
-      letters,
-      centerLetter,
-      difficulty,
-      validWords,
-      createdBy
+    const dictionaryData = await Dictionary.find();
+    // console.log(dictionaryData)
+    
+    const wordList = dictionaryData?.map(w => w.word.toLowerCase());
+
+
+    const formattedSpellings = [];
+
+    for (const spelling of spellings) {
+      const { letters, centerLetter, difficulty, createdBy = "admin" } = spelling;
+
+      const validWords = wordList
+        .filter(word => isValidWord(word, letters, centerLetter))
+        .map(word => ({
+          word,
+          hint: "No hint yet"
+        }));
+
+     
+      formattedSpellings.push({
+        letters,
+        centerLetter,
+        difficulty,
+        validWords,
+        createdBy
+      });
+    }
+
+    const newWeek = new WeekSpellingBee({
+      weekName,
+      spellings: formattedSpellings
     });
 
-    await puzzle.save();
+    await newWeek.save();
 
-    res.json({ msg: "Spelling Bee created successfully", puzzle });
+    res.json({ msg: "Spelling bee week created successfully", week: newWeek });
 
   } catch (error) {
-    console.log("Error creating spelling bee:", error.message);
+    console.error("Error creating full week:", error.message);
     res.status(500).json({ msg: "Server Error", error: error.message });
   }
 });
 
-module.exports = AdminSpellingBee
+
+module.exports = AdminSpellingBee;

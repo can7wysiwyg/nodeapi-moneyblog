@@ -3,17 +3,15 @@ const mongoose = require('mongoose');
 
 
 const DictionarySchema = new mongoose.Schema({
-
-    words: [
-        {
-            word: {type: String},
-            
-        }
-    ]
-
+  word: {
+    type: String,
+    required: true,
+    unique: true, 
+    trim: true,
+    lowercase: true
+  }
 }, {
-    timestamps: true
-})
-
+  timestamps: true
+});
 
 module.exports = mongoose.model('Dictionary', DictionarySchema)

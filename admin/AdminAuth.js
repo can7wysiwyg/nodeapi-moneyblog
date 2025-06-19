@@ -74,10 +74,9 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
 
          Admin.updateOne({_id: exists._id}, {
             adminToken: admintoken
-         })
-
-
-         res.json({message: "Success"})
+         }).then(() => {
+    res.json({ message: "Success" });
+  })
 
 
 
@@ -111,13 +110,28 @@ AdminAuth.get('/admin/check-session', async(req, res) => {
 
         const getUser = await Admin.find().limit(1)
 
-        const userSession = getUser[0].adminSession
+        const admintoken = getUser[0].adminToken
 
-        res.json({userSession})
+        
+        const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${admintoken}`
+            }
+        })
+
+        if(!response.ok) {
+            return res.json({msg: "Server Error"})
+        }
+
+        const data = await response.json()
+
+        res.json({data})
         
     } catch (error) {
-        console.log("Server Error", error.message)
-        res.json({msg: "Server Error", error: error.message })
+        console.log("Server Error check session", error.message)
+        res.json({msg: "Server Error find-session", error: error.message })
     }
 
 })
@@ -127,16 +141,16 @@ AdminAuth.get('/admin/check-session', async(req, res) => {
 AdminAuth.get('/admin/find-admin', verify, async(req, res) => {
 
     try {
-        const admin = await Admin.findById(req.admin).select('-password')
+        const admin = await Admin.findById(req.admin).select('-adminKey')
       if(!admin) return res.status(400).json({msg: "Admin Does Not Does Exist."})
     
-      res.json({user})
+      res.json({admin})
 
 
         
     } catch (error) {
-        console.log("Server Error", error.message)
-        res.json({msg: "Server Error", error: error.message })
+        console.log("Server Error find user", error.message)
+        res.json({msg: "Server Error find user", error: error.message })
     }
 
 

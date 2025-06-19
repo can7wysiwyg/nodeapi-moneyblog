@@ -89,6 +89,7 @@ PublicSpellingBee.get('/public/spelling-bee-game/:id', async(req, res) => {
 PublicSpellingBee.get('/public/play-spelling-bee-game', async(req, res) => {
     try {
         const { word, middleWord } = req.query;
+        console.log(middleWord)
 
         // Validate required parameters
         if (!middleWord) {

@@ -13,6 +13,7 @@ const MiscRoute = require('./public/MiscRoute');
 const AdminSpellingBee = require('./admin/AdminSpellingBee');
 const AdminDictionary = require('./admin/AdminDictionary');
 const PublicSpellingBee = require('./public/PublicSpellingBee');
+const AdminAuth = require('./admin/AdminAuth');
 
 
 mongoose.connect(process.env.MONGO_DEVT_URL);
@@ -39,7 +40,7 @@ app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true }));
 
 
-
+app.use(AdminAuth)
 app.use(AdminArticles)
 app.use(AdminCategory)
 app.use(PublicArticles)

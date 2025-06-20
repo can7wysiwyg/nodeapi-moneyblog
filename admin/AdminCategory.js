@@ -1,7 +1,9 @@
 const AdminCategory = require('express').Router()
 const Category = require('../models/CategoryModel')
+const verify = require('../middleware/verify')
 
-AdminCategory.post('/admin/create_category', async(req, res) => {
+
+AdminCategory.post('/admin/create_category', verify, async(req, res) => {
 
     try {
 
@@ -30,7 +32,7 @@ AdminCategory.post('/admin/create_category', async(req, res) => {
 })
 
 
-AdminCategory.put('/admin/create_subcategory/:id', async (req, res) => {
+AdminCategory.put('/admin/create_subcategory/:id', verify, async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;

@@ -112,6 +112,10 @@ AdminAuth.get('/admin/check-session', async(req, res) => {
 
         const admintoken = getUser[0].adminToken
 
+        if(!admintoken) {
+            return res.json({msg: "Please Login"})
+        }
+
         
         const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
             method: 'GET',
@@ -156,6 +160,40 @@ AdminAuth.get('/admin/find-admin', verify, async(req, res) => {
 
 })
 
+
+AdminAuth.put('/admin/logout-admin/:id', verify, async(req, res) => {
+
+    try {
+
+        const {id} = req.params
+
+        if(!id) {
+            return res.json({msg: "Admin id cannot be empty"})
+        }
+
+        const admin = await Admin.findById(id)
+
+        if(!admin) {
+            return res.json({msg: "This admin does not exists!"})
+        }
+
+        await Admin.updateOne({_id: id}, {
+            adminToken: ""
+        })
+
+
+        res.json({msg: "Successfully Logged Out!"})
+        
+    } catch (error) {
+
+        console.log("Server Error while trying to logout admin", error.message)
+        res.json({msg: "Server Error", error: error.message })
+    }
+        
+    
+
+
+})
 
 
 const createAccessToken = (admin) =>{

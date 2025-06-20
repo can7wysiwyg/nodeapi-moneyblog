@@ -1,6 +1,7 @@
 const AdminCategory = require('express').Router()
 const Category = require('../models/CategoryModel')
 const verify = require('../middleware/verify')
+const Article = require('../models/ArticlesModel')
 
 
 AdminCategory.post('/admin/create_category', verify, async(req, res) => {
@@ -65,7 +66,7 @@ AdminCategory.put('/admin/create_subcategory/:id', verify, async (req, res) => {
 
     await category.save();
 
-    res.json({ msg: "Successfully created sub-category", category });
+    res.json({ msg: "Successfully created sub-category"});
   } catch (error) {
     console.error(`Error creating sub-category: ${error.message}`);
     res.status(500).json({ msg: "Server Error" });
@@ -85,11 +86,14 @@ AdminCategory.delete('/admin/erase_category/:id', async(req, res) => {
 
     const catFound = await Category.findById(id)
 
+
     if(!catFound) {
         return res.json({msg: "This category does not exist"})
     }
 
        await Category.findByIdAndDelete(id)
+
+       await Article.deleteMany({catId: id})
 
        res.json({msg: "Successfully deleted category"})
 
@@ -132,6 +136,7 @@ AdminCategory.delete('/admin/erase_subcategory/:catId/:subCatId', async (req, re
     catFound.subCategory = catFound.subCategory.filter(
       (sub) => sub._id.toString() !== subCatId
     );
+
 
     await catFound.save();
 

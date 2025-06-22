@@ -4,6 +4,30 @@ const mongoose = require('mongoose');
 const Category = require('../models/CategoryModel')
 
 
+PublicArticles.get('/public/special-single/:id', async(req, res) => {
+
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ success: false, msg: "Id is missing" });
+        }
+        const article = await Article.findById(id).populate('catId', 'category');
+        if (!article) {
+            return res.status(404).json({ success: false, msg: "Article Not Found" });
+        }
+
+        res.json({article})
+    
+        
+    } catch (error) {
+        console.log('sErVER ErRoR ', error.message)
+
+        res.json({msg: 'sErVER ErRoR ', error:  error.message})
+    }
+
+})
+
+
 
 PublicArticles.get('/public/article-single/:id', async (req, res) => {
     try {

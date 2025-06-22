@@ -1,5 +1,6 @@
 const AdminArticles = require('express').Router()
 const Article = require('../models/ArticlesModel')
+const verify = require('../middleware/verify')
 
 const cloudinary = require('cloudinary').v2
 const fs = require('fs')
@@ -12,7 +13,7 @@ cloudinary.config({
 
 
 
-AdminArticles.post('/admin/create-article', async(req, res) => {
+AdminArticles.post('/admin/create-article', verify, async(req, res) => {
 
     try {
          
@@ -40,7 +41,7 @@ AdminArticles.post('/admin/create-article', async(req, res) => {
 
         fs.unlinkSync(req.files.photo.tempFilePath)
 
-        res.json({msg: "Successfully created new article"})
+        res.json({messg: "Successfully created new article"})
 
 
         
@@ -106,11 +107,30 @@ AdminArticles.delete('/admin/erase_article/:id', async(req, res) => {
     
         
     } catch (error) {
-        console.error(`Error updating article: ${error.message}`);
+        console.error(`Error deleting article: ${error.message}`);
     res.status(500).json({ msg: "Server Error" });
     
         
     }
+})
+
+// 
+
+
+AdminArticles.get('/admin/last-added-article', verify, async(req, res) => {
+
+    try {
+
+        const article = await Article.find().sort({_id: -1}).limit(1)
+
+        res.json({article})
+        
+    } catch (error) {
+         console.error(`Error getting article: ${error.message}`);
+    res.status(500).json({ msg: "Server Error" });
+    
+    }
+
 })
 
 

@@ -53,10 +53,12 @@ AdminArticles.post('/admin/create-article', verify, async(req, res) => {
 })
 
 
-AdminArticles.put('/admin/update-article/:id', async(req, res) => {
+AdminArticles.put('/admin/update-article/:id', verify, async(req, res) => {
 
 try {
     const {id} = req.params
+
+    
 
     if(!id) {
         return res.json({msg: "Identification needs to be provided"})
@@ -73,6 +75,56 @@ try {
        await Article.findByIdAndUpdate(id, req.body, {new: true})
 
        res.json({msg: "Article updated successfully!"})
+    
+} catch (error) {
+    console.error(`Error updating article: ${error.message}`);
+    res.status(500).json({ msg: "Server Error" });
+    
+}
+
+})
+
+AdminArticles.put('/admin/update-photo/:id', verify, async(req, res) => {
+
+try {
+   const {id} = req.params
+
+    
+
+    if(!id) {
+        return res.json({msg: "Identification needs to be provided"})
+    }
+
+
+    const ifExists = await Article.findById(id)
+
+
+    if(!ifExists) {
+        return res.json({msg: "Article Does Not Exists"})
+    }
+
+
+    if (ifExists.photo) {
+  const publicId = ifExists.photo.split("/").pop().split(".")[0];
+  await cloudinary.uploader.destroy(publicId);
+}
+
+if (!req.files || Object.keys(req.files).length === 0) {
+  return res.status(400).json({ msg: "No file uploaded." });
+}
+
+const photo = req.files.photo;
+
+const result = await cloudinary.uploader.upload(photo.tempFilePath);
+
+ifExists.photo = result.secure_url;
+
+await ifExists.save();
+
+fs.unlinkSync(photo.tempFilePath);
+
+res.json({ msg: "Article photo updated successfully." });
+
     
 } catch (error) {
     console.error(`Error updating article: ${error.message}`);
@@ -132,6 +184,24 @@ AdminArticles.get('/admin/last-added-article', verify, async(req, res) => {
     }
 
 })
+
+
+AdminArticles.get('/admin/added-article', verify, async(req, res) => {
+
+    try {
+
+        const articles = await Article.find().sort({_id: -1})
+
+        res.json({articles})
+        
+    } catch (error) {
+         console.error(`Error getting articles: ${error.message}`);
+    res.status(500).json({ msg: "Server Error" });
+    
+    }
+
+})
+
 
 
 module.exports = AdminArticles

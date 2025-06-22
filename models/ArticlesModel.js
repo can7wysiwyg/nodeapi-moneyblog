@@ -20,7 +20,7 @@ const ArticleSchema = mongoose.Schema({
     },
     subCatId: {
         type: String,
-        required: true
+    
     },
     articleKeywords: {
         type: Array,

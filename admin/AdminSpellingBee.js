@@ -1,9 +1,28 @@
 const AdminSpellingBee = require('express').Router();
 const WeekSpellingBee = require('../models/SpellingBeeModel');
+const SpellingBee = require('../models/SpellingBeeModel')
 const commonWords = require('./misc/commonWords')
+const verify = require('../middleware/verify')
 
 
 
+// 
+AdminSpellingBee.get('/admin/spelling-game-enums', verify, async(req, res) => {
+
+try {
+
+  const gameEnums = await SpellingBee.schema.path('difficulty').options.enums
+
+  res.json({gameEnums})
+
+
+} catch(error) {
+  res.json({msg: "Server Error", error: error.message})
+}
+
+})
+
+// 
 
 // Helper function to generate possible words from letters
 function generatePossibleWords(letters, centerLetter, minLength = 4, maxLength = 8) {
@@ -95,23 +114,48 @@ AdminSpellingBee.post('/admin/create-full-spellingbee-week', async (req, res) =>
   try {
     const { weekName, spellings } = req.body;
 
-    if (!weekName || !Array.isArray(spellings)) {
-      return res.status(400).json({
-        msg: "You must provide exactly 21 spelling challenges: 7 for each difficulty (easy, medium, hard)."
-      });
-    }
-
-    const easyCount = spellings.filter(s => s.difficulty === 'easy').length;
-    const mediumCount = spellings.filter(s => s.difficulty === 'medium').length;
-    const hardCount = spellings.filter(s => s.difficulty === 'hard').length;
+    
 
     
-if (easyCount === 0 || mediumCount === 0 || hardCount === 0) {
+
+    if (!weekName || !Array.isArray(spellings)) {
+      return res.status(400).json({
+        msg: "Cannot be empty"
+      });
+    }
+ 
+
+    const easyCount = spellings.filter(s => s.difficulty === 'easy').length;
+
+     
+    const mediumCount = spellings.filter(s => s.difficulty === 'medium').length;
+    const hardCount = spellings.filter(s => s.difficulty === 'difficult').length;
+
+    
+if (easyCount === 0) {
   return res.status(400).json({
-    msg: "You must provide **at least one** spelling challenge for each difficulty level: easy, medium, hard.",
+    msg: "You must provide **at least one** spelling challenge for each difficulty level: easy",
     counts: { easy: easyCount, medium: mediumCount, hard: hardCount }
   });
 }
+
+
+
+if (easyCount === 0 || mediumCount === 0 || hardCount === 0) {
+  return res.status(400).json({
+    msg: "You must provide **at least one** spelling challenge for each difficulty level: hard.",
+    counts: {  hard: hardCount }
+  });
+}
+
+
+if (mediumCount === 0) {
+  return res.status(400).json({
+    msg: "You must provide **at least one** spelling challenge for each difficulty level:  medium",
+    counts: {medium: mediumCount }
+  });
+}
+
 
 
     const formattedSpellings = [];
@@ -135,9 +179,9 @@ if (easyCount === 0 || mediumCount === 0 || hardCount === 0) {
       // Generate possible words from the letters
       const possibleWords = generatePossibleWords(letters, centerLetter);
       
-      // Validate words with the API and get definitions
+  
       const validWords = [];
-      const batchSize = 5; // Process in batches to avoid overwhelming the API
+      const batchSize = 5;
       
       for (let j = 0; j < possibleWords.length && validWords.length < 15; j += batchSize) {
         const batch = possibleWords.slice(j, j + batchSize);

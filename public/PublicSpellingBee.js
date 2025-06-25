@@ -45,7 +45,7 @@ PublicSpellingBee.get('/public/spelling-bee-game/:id', async(req, res) => {
 
     const easySpells = latestWeek.spellings.filter(sp => sp.difficulty === 'easy');
     const mediumSpells = latestWeek.spellings.filter(sp => sp.difficulty === 'medium');
-    const hardSpells = latestWeek.spellings.filter(sp => sp.difficulty === 'hard');
+    const hardSpells = latestWeek.spellings.filter(sp => sp.difficulty === 'difficult');
 
 
     
@@ -69,7 +69,7 @@ PublicSpellingBee.get('/public/spelling-bee-game/:id', async(req, res) => {
           centerLetter: gameSet.medium.centerLetter,
           difficulty: gameSet.medium.difficulty
         },
-        hard: {
+        difficult: {
           letters: gameSet.hard.letters,
           centerLetter: gameSet.hard.centerLetter,
           difficulty: gameSet.hard.difficulty

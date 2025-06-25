@@ -252,5 +252,45 @@ if (mediumCount === 0) {
 });
 
 
+AdminSpellingBee.put('/admin/update-spelling-game/:id', verify,  async(req, res) => {
+try {
+   const {id} = req.params
+   const {centerLetter, difficulty, letters} = req.body
+
+
+
+   if (!id || !centerLetter || !difficulty || !Array.isArray(letters)) {
+      return res.status(400).json({ msg: "Missing or invalid fields" });
+    }
+
+  const exists = await WeekSpellingBee.findById(id)
+
+  if(!exists) {
+    return res.json({msg: "Action Not Possible"})
+  }
+
+ const game = exists.spellings.find(u => u.difficulty === difficulty)
+
+
+game.centerLetter = centerLetter.toLowerCase()
+
+game.letters = letters
+
+exists.save()
+
+
+ res.json({msg: "success"})
+
+  
+} catch (error) {
+
+  console.log(error.message)
+
+  res.json({msg: "Server Error", error: error.message})
+  
+}
+
+})
+
 
 module.exports = AdminSpellingBee;

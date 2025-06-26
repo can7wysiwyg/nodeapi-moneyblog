@@ -272,7 +272,7 @@ try {
  const game = exists.spellings.find(u => u.difficulty === difficulty)
 
 
-game.centerLetter = centerLetter.toLowerCase()
+game.centerLetter = centerLetter
 
 game.letters = letters
 
@@ -292,5 +292,38 @@ exists.save()
 
 })
 
+
+AdminSpellingBee.delete('/admin/delete-spelling-game/:id', verify, async(req, res) => {
+
+
+  try {
+
+    const {id} = req.params;
+
+    if (!id ) {
+      return res.status(400).json({ msg: "Missing or invalid ID" });
+    }
+
+  const exists = await WeekSpellingBee.findById(id)
+
+  if(!exists) {
+    return res.json({msg: "Action Not Possible"})
+  }
+
+
+  await WeekSpellingBee.findByIdAndDelete(id)
+
+  res.json({msg: "Game Successfully Deleted! Add A New One."})
+
+    
+    
+  } catch (error) {
+    console.log("failed to delete game", error.message)
+    res.json({msg: "Server Error"})
+  }
+
+
+
+})
 
 module.exports = AdminSpellingBee;

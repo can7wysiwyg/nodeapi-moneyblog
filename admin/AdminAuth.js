@@ -110,7 +110,7 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
 })
 
 
-AdminAuth.get('/admin/check-session', async(req, res) => {
+AdminAuth.get('/admin/check-session/', async(req, res) => {
 
     try {
 
@@ -125,7 +125,7 @@ AdminAuth.get('/admin/check-session', async(req, res) => {
         const getUser = await Admin.find().limit(1)
         const admindId = getUser[0]._id
 
-        const checkKey = bcrypt.compareSync(admindId, key)
+        const checkKey = bcrypt.compareSync(admindId.toString(), key)
 
         if(!checkKey) {
             return res.json({msg: "invalid key baby"})

@@ -59,6 +59,9 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
         return res.json({msg: "This user does not exists"})
     }
 
+
+    
+
     
     const passwordMatch = await bcrypt.compare(adminKey, exists.adminKey)
 
@@ -72,10 +75,13 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
     
         const admintoken = createAccessToken({id: admin.id})
 
+        const key = bcrypt.hashSync(admin.id, 10)
+        console.log(key)
+         
          Admin.updateOne({_id: exists._id}, {
             adminToken: admintoken
          }).then(() => {
-    res.json({ message: "Success" });
+    res.json({key: key});
   })
 
 
@@ -108,8 +114,23 @@ AdminAuth.get('/admin/check-session', async(req, res) => {
 
     try {
 
-        const getUser = await Admin.find().limit(1)
+        const {key} = req.body
 
+         if(!key) {
+            return res.json({msg: "Key cannot be empty"})
+        }
+
+
+
+        const getUser = await Admin.find().limit(1)
+        const admindId = getUser[0]._id
+
+        const checkKey = bcrypt.compareSync(admindId, key)
+
+        if(!checkKey) {
+            return res.json({msg: "invalid key baby"})
+        }
+       
         const admintoken = getUser[0].adminToken
 
         if(!admintoken) {
@@ -161,23 +182,18 @@ AdminAuth.get('/admin/find-admin', verify, async(req, res) => {
 })
 
 
-AdminAuth.put('/admin/logout-admin/:id', verify, async(req, res) => {
+AdminAuth.put('/admin/logout-admin', verify, async(req, res) => {
 
     try {
 
-        const {id} = req.params
-
-        if(!id) {
-            return res.json({msg: "Admin id cannot be empty"})
-        }
-
-        const admin = await Admin.findById(id)
+        
+        const admin = await Admin.findById(req.admin.id)
 
         if(!admin) {
             return res.json({msg: "This admin does not exists!"})
         }
 
-        await Admin.updateOne({_id: id}, {
+        await Admin.updateOne({_id: req.admin.id}, {
             adminToken: ""
         })
 

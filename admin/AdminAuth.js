@@ -186,8 +186,8 @@ AdminAuth.put('/admin/logout-admin', verify, async(req, res) => {
 
     try {
 
-        
-        const admin = await Admin.findById(req.admin.id)
+         console.log(req.admin.id)
+        const admin = await Admin.findById({_id: req.admin.id})
 
         if(!admin) {
             return res.json({msg: "This admin does not exists!"})

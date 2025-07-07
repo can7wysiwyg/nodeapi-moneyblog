@@ -116,10 +116,7 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
 
         const {key} = req.query
 
-         if(!key) {
-            return res.json({msg: "Key cannot be empty"})
-        }
-
+        
 
 
         const getUser = await Admin.find().limit(1)
@@ -127,13 +124,10 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
 
         const checkKey = bcrypt.compareSync(admindId.toString(), key)
 
-        if(!checkKey) {
-            return res.json({msg: "invalid key baby"})
-        }
-       
+        
         const admintoken = getUser[0].adminToken
 
-        if(!admintoken) {
+        if(!checkKey || !admintoken) {
             return res.json({msg: "Please Login"})
         }
 

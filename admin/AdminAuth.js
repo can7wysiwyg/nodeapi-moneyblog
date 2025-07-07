@@ -114,7 +114,7 @@ AdminAuth.get('/admin/check-session', async(req, res) => {
 
     try {
 
-        const {key} = req.body
+        const {key} = req.query
 
          if(!key) {
             return res.json({msg: "Key cannot be empty"})

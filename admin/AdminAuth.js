@@ -110,68 +110,53 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
 })
 
 
-AdminAuth.get('/admin/check-session/', async(req, res) => {
 
-    try {
+AdminAuth.get('/admin/check-session/', async (req, res) => {
+  try {
+    const { key } = req.query;
 
-        const {key} = req.query
-
-        
-
-
-        const getUser = await Admin.find().limit(1)
-        const admindId = getUser[0]._id
-
-        const checkKey = bcrypt.compareSync(admindId.toString(), key)
-
-        
-        const admintoken = getUser[0].adminToken
-
-        
-
-
-        
-         if(!checkKey || !admintoken) {
-             return res.json({msg: "Please Login"})
-     }
-
-
-     const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
-
-        const myId = idFromToken.id
-         
-       
-        if(myId === checkKey) {
-
-            const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${admintoken}`
-            }
-        })
-
-        if(!response.ok) {
-            return res.json({msg: "Server Error"})
-        }
-
-        const data = await response.json()
-
-        res.json({data})
-        
-            
-        }
-
-        
-        
-        
-        
-    } catch (error) {
-        console.log("Server Error check session", error.message)
-        res.json({msg: "Server Error find-session", error: error.message })
+    const getUser = await Admin.find().limit(1);
+    if (!getUser || getUser.length === 0) {
+      return res.json({ msg: "Admin not found" });
     }
 
-})
+    const admindId = getUser[0]._id.toString();
+    const admintoken = getUser[0].adminToken;
+
+    const checkKey = bcrypt.compareSync(admindId, key);
+
+    if (!checkKey || !admintoken) {
+      return res.json({ msg: "Please Login" });
+    }
+
+    const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN);
+    const myId = idFromToken.id;
+
+    if (checkKey && myId === admindId) {
+      const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${admintoken}`,
+        },
+      });
+
+      if (!response.ok) {
+        return res.json({ msg: "Server Error" });
+      }
+
+      const data = await response.json();
+      return res.json({ data });
+    }
+
+    
+    return res.json({ msg: "Invalid session" });
+
+  } catch (error) {
+    console.log("Server Error check session", error.message);
+    res.json({ msg: "Server Error find-session", error: error.message });
+  }
+});
 
 
 

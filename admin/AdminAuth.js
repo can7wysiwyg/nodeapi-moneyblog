@@ -140,28 +140,28 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
 
         const myId = idFromToken.id
 
+              res.json({myId})
 
+        // if(myId === checkKey) {
 
-        if(myId === checkKey) {
+        //     const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Authorization': `Bearer ${admintoken}`
+        //     }
+        // })
 
-            const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${admintoken}`
-            }
-        })
+        // if(!response.ok) {
+        //     return res.json({msg: "Server Error"})
+        // }
 
-        if(!response.ok) {
-            return res.json({msg: "Server Error"})
-        }
+        // const data = await response.json()
 
-        const data = await response.json()
-
-        res.json({data})
+        // res.json({data})
         
             
-        }
+        // }
 
         
         

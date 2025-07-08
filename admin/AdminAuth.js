@@ -127,6 +127,11 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
         
         const admintoken = getUser[0].adminToken
 
+        if (!admintoken) {
+  return res.status(401).json({ msg: "No token provided" });
+}
+
+
         const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
 
         res.json({idFromToken})

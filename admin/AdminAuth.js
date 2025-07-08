@@ -127,7 +127,7 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
         
         const admintoken = getUser[0].adminToken
 
-        const idFromToken = jwt.verify(jwt, 'process.env.ACCESS_TOKEN')
+        const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
 
         res.json({idFromToken})
 

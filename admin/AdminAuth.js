@@ -130,35 +130,42 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
         
 
 
-        const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
+        
+         if(!checkKey || !admintoken) {
+             return res.json({msg: "Please Login"})
+     }
+
+
+     const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
 
         const myId = idFromToken.id
 
+
+
         if(myId === checkKey) {
-              return res.json({msg: "i promise to never masturbate to this code"})
+
+            const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${admintoken}`
+            }
+        })
+
+        if(!response.ok) {
+            return res.json({msg: "Server Error"})
+        }
+
+        const data = await response.json()
+
+        res.json({data})
+        
+            
         }
 
         
-        // if(!checkKey || !admintoken) {
-        //     return res.json({msg: "Please Login"})
-        // }
-
         
-        // const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
-        //     method: 'GET',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': `Bearer ${admintoken}`
-        //     }
-        // })
-
-        // if(!response.ok) {
-        //     return res.json({msg: "Server Error"})
-        // }
-
-        // const data = await response.json()
-
-        // res.json({data})
+        
         
     } catch (error) {
         console.log("Server Error check session", error.message)

@@ -127,26 +127,30 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
         
         const admintoken = getUser[0].adminToken
 
-        if(!checkKey || !admintoken) {
-            return res.json({msg: "Please Login"})
-        }
+        const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
+
+        res.json({idFromToken})
+
+        // if(!checkKey || !admintoken) {
+        //     return res.json({msg: "Please Login"})
+        // }
 
         
-        const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${admintoken}`
-            }
-        })
+        // const response = await fetch(`${process.env.API_URL}/admin/find-admin`, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Authorization': `Bearer ${admintoken}`
+        //     }
+        // })
 
-        if(!response.ok) {
-            return res.json({msg: "Server Error"})
-        }
+        // if(!response.ok) {
+        //     return res.json({msg: "Server Error"})
+        // }
 
-        const data = await response.json()
+        // const data = await response.json()
 
-        res.json({data})
+        // res.json({data})
         
     } catch (error) {
         console.log("Server Error check session", error.message)

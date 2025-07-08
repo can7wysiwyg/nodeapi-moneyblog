@@ -139,8 +139,9 @@ AdminAuth.get('/admin/check-session/', async(req, res) => {
      const idFromToken = jwt.verify(admintoken, process.env.ACCESS_TOKEN)
 
         const myId = idFromToken.id
-
-              res.json({myId})
+         
+        console.log(myId)
+              res.json(myId)
 
         // if(myId === checkKey) {
 

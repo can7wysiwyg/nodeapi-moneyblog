@@ -650,7 +650,7 @@ AdminAuth.put('/admin/logout-admin', verify, async(req, res) => {
             refreshToken: ""
         })
 
-        // Clear the refresh token cookie
+        
         res.clearCookie('refreshtoken');
 
         res.json({msg: "Successfully Logged Out!"})
@@ -671,7 +671,7 @@ const createAccessToken = (admin) =>{
     return jwt.sign(admin, process.env.ACCESS_TOKEN, {expiresIn: '15m'}) 
   }
   const createRefreshToken = (admin) =>{
-    return jwt.sign(admin, process.env.REFRESH_TOKEN, {expiresIn: '30d'})
+    return jwt.sign(admin, process.env.REFRESH_TOKEN, {expiresIn: '15m'})
   }
 
 

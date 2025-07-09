@@ -18,6 +18,9 @@ const AdminSchema = mongoose.Schema({
     adminToken: {
         type: String,
         unique: true
+    },
+    refreshToken: {
+        type: String
     }
 
 

@@ -9,7 +9,6 @@ const AdminArticles = require('./admin/AdminArticles');
 const AdminCategory = require('./admin/AdminCategory')
 const PublicArticles = require('./public/PublicArticles');
 const PublicCategories = require('./public/PublicCategories');
-const MiscRoute = require('./public/MiscRoute');
 const AdminSpellingBee = require('./admin/AdminSpellingBee');
 const AdminDictionary = require('./admin/AdminDictionary');
 const PublicSpellingBee = require('./public/PublicSpellingBee');
@@ -45,7 +44,6 @@ app.use(AdminArticles)
 app.use(AdminCategory)
 app.use(PublicArticles)
 app.use(PublicCategories)
-app.use(MiscRoute)
 app.use(AdminSpellingBee)
 app.use(AdminDictionary)
 app.use(PublicSpellingBee)

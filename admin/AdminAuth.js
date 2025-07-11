@@ -161,7 +161,7 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
 // });
 
 
-AdminAuth.get('/admin/check-session/', async (req, res) => {
+AdminAuth.get('/admin/check-session', async (req, res) => {
   try {
     const { key } = req.query;
 

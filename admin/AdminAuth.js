@@ -237,7 +237,7 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
 AdminAuth.get('/admin/find-admin', verify, async(req, res) => {
 
     try {
-        const admin = await Admin.findById(req.admin).select('-adminKey refreshToken')
+        const admin = await Admin.findById(req.admin).select('-adminKey')
       if(!admin) return res.status(400).json({msg: "Admin Does Not Does Exist."})
     
       res.json({admin})

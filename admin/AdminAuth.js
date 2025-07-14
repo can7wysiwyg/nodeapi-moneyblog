@@ -165,6 +165,10 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
   try {
     const { key } = req.query;
 
+
+    console.log("key", key)
+    
+
     const getUser = await Admin.find().limit(1);
     if (!getUser || getUser.length === 0) {
       return res.json({ msg: "Admin not found" });
@@ -181,6 +185,8 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
     }
 
     let validToken = admintoken;
+
+    
 
     try {
       const decoded = jwt.verify(admintoken, process.env.ACCESS_TOKEN);
@@ -214,7 +220,7 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${validToken}`,
+        'Authorization': `Bearer ${key}`,
       },
     });
 
@@ -223,6 +229,8 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
     }
 
     const data = await response.json();
+
+  
     return res.json({ data });
 
   } catch (error) {
@@ -237,7 +245,7 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
 AdminAuth.get('/admin/find-admin', verify, async(req, res) => {
 
     try {
-        const admin = await Admin.findById(req.admin).select('-adminKey')
+        const admin = await Admin.findById(req.admin).select('-adminKey -refresToken -adminToken')
       if(!admin) return res.status(400).json({msg: "Admin Does Not Does Exist."})
     
       res.json({admin})

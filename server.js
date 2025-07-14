@@ -13,7 +13,6 @@ const AdminSpellingBee = require('./admin/AdminSpellingBee');
 const AdminDictionary = require('./admin/AdminDictionary');
 const PublicSpellingBee = require('./public/PublicSpellingBee');
 const AdminAuth = require('./admin/AdminAuth');
-// const TestRoute = require('./TestRoute');
 
 
 mongoose.connect(process.env.MONGO_DEVT_URL);
@@ -48,7 +47,6 @@ app.use(PublicCategories)
 app.use(AdminSpellingBee)
 app.use(AdminDictionary)
 app.use(PublicSpellingBee)
-// app.use(TestRoute)
 
 
 

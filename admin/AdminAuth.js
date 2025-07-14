@@ -74,7 +74,7 @@ AdminAuth.post('/admin/user-login', async(req, res) => {
     
         const admintoken = createAccessToken({id: admin.id})
 
-        const key = bcrypt.hashSync(admin.id, 10)
+        const key = admin.id
       
          
          Admin.updateOne({_id: exists._id}, {
@@ -175,8 +175,8 @@ AdminAuth.get('/admin/check-session', async (req, res) => {
     const admintoken = user.adminToken;
     const refreshtoken = user.refreshToken;
 
-    const checkKey = bcrypt.compareSync(admindId, key);
-    if (!checkKey || !admintoken) {
+    
+    if (!key || !admintoken) {
       return res.json({ msg: "Please Login" });
     }
 

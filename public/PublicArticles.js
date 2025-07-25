@@ -240,101 +240,101 @@ PublicArticles.get('/public/show-articles', async(req, res) => {
 
 
 
-PublicArticles.get('/public/articles-by-clicked', async(req, res) => {
-    try {
-        const {catId, subCatId, keyword} = req.query;
+// PublicArticles.get('/public/articles-by-clicked', async(req, res) => {
+//     try {
+//         const {catId, subCatId, keyword} = req.query;
         
         
-        const keywords = Array.isArray(keyword) ? keyword : [keyword];
+//         const keywords = Array.isArray(keyword) ? keyword : [keyword];
         
-        if(!catId) {
-            return res.json({msg: "Category cannot be empty"});
-        }
+//         if(!catId) {
+//             return res.json({msg: "Category cannot be empty"});
+//         }
         
-        if(keyword?.length === 0) {
-            return res.json({msg: "Suggestion only works with keywords"});
-        }
+//         if(keyword?.length === 0) {
+//             return res.json({msg: "Suggestion only works with keywords"});
+//         }
         
-        let pipeline;
+//         let pipeline;
         
-        if(subCatId) {
-            pipeline = [
-                {
-                    $match: {
-                        catId: new mongoose.Types.ObjectId(catId),
-                        subCatId: subCatId,
-                        articleKeywords: { $in: keywords }
-                    }
-                },
-                {
-                    $addFields: {
-                        keywordMatches: { $size: { $setIntersection: ["$articleKeywords", keywords] } },
-                        score: {
-                            $add: [
-                                "$articleClicks",
-                                { $multiply: ["$keywordMatches", 5] }
-                            ]
-                        }
-                    }
-                },
-                { $sort: { score: -1 } },
-                {
-                    $lookup: {
-                        from: "categories",
-                        localField: "catId",
-                        foreignField: "_id",
-                        as: "catId"
-                    }
-                },
-                { $unwind: "$catId" }
-            ];
-        } else {
-            pipeline = [
-                {
-                    $match: {
-                        catId: mongoose.Types.ObjectId(catId),
-                        articleKeywords: { $in: keywords }
-                    }
-                },
-                {
-                    $addFields: {
-                        keywordMatches: { $size: { $setIntersection: ["$articleKeywords", keywords] } },
-                        score: {
-                            $add: [
-                                "$articleClicks",
-                                { $multiply: ["$keywordMatches", 5] }
-                            ]
-                        }
-                    }
-                },
-                { $sort: { score: -1 } },
-                {
-                    $lookup: {
-                        from: "categories",
-                        localField: "catId",
-                        foreignField: "_id",
-                        as: "catId"
-                    }
-                },
-                { $unwind: "$catId" }
-            ];
-        }
+//         if(subCatId) {
+//             pipeline = [
+//                 {
+//                     $match: {
+//                         catId: new mongoose.Types.ObjectId(catId),
+//                         subCatId: subCatId,
+//                         articleKeywords: { $in: keywords }
+//                     }
+//                 },
+//                 {
+//                     $addFields: {
+//                         keywordMatches: { $size: { $setIntersection: ["$articleKeywords", keywords] } },
+//                         score: {
+//                             $add: [
+//                                 "$articleClicks",
+//                                 { $multiply: ["$keywordMatches", 5] }
+//                             ]
+//                         }
+//                     }
+//                 },
+//                 { $sort: { score: -1 } },
+//                 {
+//                     $lookup: {
+//                         from: "categories",
+//                         localField: "catId",
+//                         foreignField: "_id",
+//                         as: "catId"
+//                     }
+//                 },
+//                 { $unwind: "$catId" }
+//             ];
+//         } else {
+//             pipeline = [
+//                 {
+//                     $match: {
+//                         catId: mongoose.Types.ObjectId(catId),
+//                         articleKeywords: { $in: keywords }
+//                     }
+//                 },
+//                 {
+//                     $addFields: {
+//                         keywordMatches: { $size: { $setIntersection: ["$articleKeywords", keywords] } },
+//                         score: {
+//                             $add: [
+//                                 "$articleClicks",
+//                                 { $multiply: ["$keywordMatches", 5] }
+//                             ]
+//                         }
+//                     }
+//                 },
+//                 { $sort: { score: -1 } },
+//                 {
+//                     $lookup: {
+//                         from: "categories",
+//                         localField: "catId",
+//                         foreignField: "_id",
+//                         as: "catId"
+//                     }
+//                 },
+//                 { $unwind: "$catId" }
+//             ];
+//         }
         
-        const allArticles = await Article.aggregate(pipeline);
+//         const allArticles = await Article.aggregate(pipeline);
         
-        // Apply Fisher-Yates shuffle to the results
-        const shuffledArticles = shuffleArray(allArticles);
+//         // Apply Fisher-Yates shuffle to the results
+//         const shuffledArticles = shuffleArray(allArticles);
         
-        res.json({
-            count: shuffledArticles.length,
-            articles: shuffledArticles
-        });
+//         res.json({
+//             count: shuffledArticles.length,
+//             articles: shuffledArticles
+//         });
         
-    } catch (error) {
-        console.error(`Error fetching articles by clicked: ${error.message}`);
-        res.status(500).json({ msg: "Server Error" });
-    }
-});
+//     } catch (error) {
+//         console.error(`Error fetching articles by clicked: ${error.message}`);
+//         res.status(500).json({ msg: "Server Error" });
+//     }
+// });
 
 
 

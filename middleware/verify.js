@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/AdminModel')
+const Admin = require('../models/AdminModel');
+const { decryptId } = require('./cryptic');
 
 
 const verify = async (req, res, next) => {
@@ -17,8 +18,8 @@ const verify = async (req, res, next) => {
     const admindId = user._id.toString();
     const admintoken = user.adminToken;
 
-    
-    const isValidKey = admindId === key
+    const decryptedKey = decryptId(key)
+    const isValidKey = admindId === decryptedKey
 
 
     
@@ -33,7 +34,7 @@ const verify = async (req, res, next) => {
     }
 
     
-    req.admin = await Admin.findById(decoded.id).select('-adminKey -refreshToken -adminToken');
+    req.admin = await Admin.findById(decoded.id).select('-adminKey -refreshToken -adminToken -_id');
 
     next();
   }
